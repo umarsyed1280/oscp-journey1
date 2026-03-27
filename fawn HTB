@@ -1,0 +1,26 @@
+## 1. Recon
+- Ran nmap scan:
+
+nmap -sC -sV <IP>
+
+- Found port 21 open (FTP)
+
+## 2. Enumeration
+- Identified FTP service vsftpd 3.0.3
+- Anonymous login allowed
+
+## 3. Initial Access
+- Connected using:
+
+ftp <IP>
+
+- Username: anonymous
+- Password: anonymous
+
+## 4. Privilege Escalation / File Access
+- Downloaded `flag.txt` using `get flag.txt`
+- Read flag locally with `cat flag.txt`
+
+## 5. Lessons Learned
+- FTP without encryption is insecure
+- Anonymous login can lead to full access
