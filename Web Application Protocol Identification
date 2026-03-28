@@ -1,0 +1,104 @@
+# Web Application Protocol Identification - HTTPS
+
+## Objective
+
+The goal of this task was to:
+
+* Start the Debian VM
+* Connect to it via SSH
+* Start the Apache web server
+* Identify the protocol used by the vulnerable web application
+
+---
+
+## Initial Information
+
+The lab specifies that the web application is located at:
+
+/var/www/https/
+
+This path is important for understanding how the application is served.
+
+---
+
+## Understanding URL Structure
+
+A standard URL follows this format:
+
+protocol://IP-address/path
+
+Examples:
+
+* http://192.168.1.10
+* https://192.168.1.10
+* ftp://192.168.1.10
+
+The protocol is the part before "://".
+
+---
+
+## Key Observation
+
+The directory name:
+
+/var/www/https/
+
+strongly indicates that the application is configured to run over HTTPS.
+
+---
+
+## Apache Behavior
+
+Apache typically serves web applications as follows:
+
+* Port 80 → HTTP
+* Port 443 → HTTPS
+
+When a directory is specifically named "https", it usually corresponds to a secure virtual host configuration.
+
+---
+
+## Verification Steps
+
+After connecting via SSH:
+
+ssh student@<target-ip>
+
+Start Apache:
+
+sudo systemctl start apache2
+
+Then verify the protocol using:
+
+curl -k https://<target-ip>
+
+Or access via browser:
+
+https://<target-ip>
+
+---
+
+## Conclusion
+
+Based on:
+
+* Directory naming (/var/www/https/)
+* Apache configuration patterns
+* Standard protocol usage
+
+The vulnerable web application is running on:
+
+HTTPS
+
+---
+
+## Additional Note
+
+If unsure about the protocol in a real scenario, it can be confirmed using:
+
+nmap -sV <target-ip>
+
+Typical output:
+
+* 80/tcp → http
+* 443/tcp → https
