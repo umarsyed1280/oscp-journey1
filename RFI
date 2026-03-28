@@ -1,0 +1,158 @@
+# Remote File Inclusion (RFI) - Practical Notes
+
+## Initial Observation
+
+I started by visiting the target:
+
+http://192.168.227.16/
+
+The response was:
+
+403 Forbidden
+
+### Conclusion:
+
+* Server is running (Apache)
+* Root directory access is restricted
+* Directory listing is disabled
+
+This suggested that the application might not be located in the root directory.
+
+---
+
+## Thinking Process
+
+Instead of stopping, I considered that the application could be in a subdirectory.
+
+From experience, common directories include:
+
+* /admin
+* /login
+* /portal
+* /cms
+* /blog
+* /test
+* /dev
+* /site
+* /meteor
+
+---
+
+## Directory Enumeration
+
+### Method 1: Manual Guessing
+
+Tried accessing common paths manually:
+
+* /admin
+* /blog
+* /meteor
+
+---
+
+### Method 2: Directory Bruteforce
+
+Used gobuster:
+
+gobuster dir -u http://192.168.227.16 -w /usr/share/wordlists/dirb/common.txt
+
+This revealed:
+
+* /meteor (Status: 200)
+
+---
+
+## Accessing the Application
+
+Visited:
+
+http://192.168.227.16/meteor/
+
+The application loaded successfully.
+
+---
+
+## Important Concept (Apache Behavior)
+
+Apache automatically loads default files such as:
+
+* index.php
+* index.html
+
+So when accessing:
+
+http://192.168.227.16/meteor/
+
+It internally loads:
+meteor/index.php
+
+---
+
+## Exploitation Idea (RFI)
+
+From the lab hint:
+
+* There is a Remote File Inclusion vulnerability on port 80
+* It can be used to include a PHP webshell
+
+Target file used:
+
+* /usr/share/webshells/php/simple-backdoor.php
+
+---
+
+## Execution
+
+Used the vulnerable parameter to include the webshell.
+
+Then used the "cmd" parameter to execute commands remotely.
+
+Example:
+?cmd=whoami
+?cmd=ls
+
+---
+
+## Sensitive File Discovery
+
+Navigated to:
+
+/home/elaine/.ssh/
+
+Listed files and accessed:
+authorized_keys
+
+---
+
+## Key Finding
+
+Inside authorized_keys:
+
+* Found an entry with a restricted command
+* The flag was embedded in the command parameter
+
+---
+
+## Lessons Learned
+
+* A 403 response does not mean the application is not present
+* Directory enumeration is critical
+* Apache default behavior can reveal hidden applications
+* RFI can lead to remote command execution
+* Misconfigured SSH keys can expose sensitive data
+
+---
+
+## Personal Insight
+
+At first, I assumed the site was inaccessible because of the 403 response.
+
+However, after further thinking, I considered that the application might exist in another location.
+
+This shifted my mindset from:
+"Nothing is here"
+
+To:
+"There is something hidden that needs to be found"
+
+This approach helped me continue and successfully identify the target.
