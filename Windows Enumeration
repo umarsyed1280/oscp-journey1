@@ -1,0 +1,101 @@
+# Windows Enumeration - Installed Applications via Registry
+
+## Objective
+
+The goal of this task was to:
+
+* Connect to a Windows target system
+* Enumerate installed applications
+* Identify a flag hidden within application entries
+
+---
+
+## Initial Access
+
+Connected to the target system using a Netcat bind shell:
+
+nc 192.168.233.220 4444
+
+This provided a Windows command shell for further enumeration.
+
+---
+
+## Enumerating Installed Applications (WMIC)
+
+Initial attempt:
+
+wmic product get name,version
+
+### Observation
+
+This command lists MSI-installed applications only.
+Not all installed programs appear here, so important entries may be missed.
+
+---
+
+## Registry-Based Enumeration
+
+To get a more complete list of installed applications, the Windows registry was queried:
+
+powershell "Get-ItemProperty HKLM:\Software\Microsoft\Windows\CurrentVersion\Uninstall*"
+
+### Explanation
+
+The Uninstall registry key stores information about installed applications, including:
+
+* Display name
+* Version
+* Publisher
+* Installation details
+
+This method provides more comprehensive results than WMIC.
+
+---
+
+## Searching for Relevant Entries
+
+To quickly identify potential flag-related entries:
+
+powershell "Get-ItemProperty HKLM:\Software\Microsoft\Windows\CurrentVersion\Uninstall* | findstr /i flag"
+
+### Result
+
+An entry containing "flag" was identified.
+
+---
+
+## Retrieving the Flag Entry
+
+The specific registry key was queried:
+
+powershell "Get-ItemProperty HKLM:\Software\Microsoft\Windows\CurrentVersion\Uninstall\flag"
+
+This revealed the flag stored within the registry entry.
+
+---
+
+## Key Concepts
+
+* WMIC provides limited visibility (MSI-based applications only)
+* Registry enumeration is more reliable for discovering installed applications
+* The Uninstall key is a common location for application metadata
+* Lab environments may store flags in unconventional places such as registry entries
+
+---
+
+## Additional Enumeration Methods
+
+Other useful commands:
+
+* wmic product get name,version
+* Get-WmiObject Win32_Product
+* Registry queries under HKLM Uninstall path
+
+---
+
+## Summary
+
+* Gained shell access via Netcat
+* Attempted application enumeration using WMIC
+* Switched to registry-based enumeration for complete results
+* Identified and extracted the flag from a registry entry
