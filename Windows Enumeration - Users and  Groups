@@ -1,0 +1,76 @@
+# Windows Enumeration - Remote Management Users Group
+
+## Objective
+
+The goal of this task was to:
+
+* Connect to a Windows target system
+* Enumerate members of the "Remote Management Users" local group
+* Identify a user other than the specified one
+
+---
+
+## Initial Access
+
+Connected to the target system using a Netcat bind shell:
+
+nc 192.168.233.220 4444
+
+This provided a command shell for enumeration.
+
+---
+
+## Enumerating the Remote Management Users Group
+
+Executed the following command:
+
+net localgroup "Remote Management Users"
+
+### Explanation
+
+* net localgroup → displays members of a local group
+* "Remote Management Users" → target group name
+
+---
+
+## Observed Output
+
+The command returned the following members:
+
+* daveadmin
+* steve
+
+---
+
+## Identifying the Required User
+
+The task required identifying a user other than "steve".
+
+### Result
+
+daveadmin
+
+---
+
+## Key Concept
+
+The "Remote Management Users" group allows users to manage the system remotely using Windows Remote Management (WinRM).
+
+---
+
+## Practical Relevance
+
+If valid credentials are available, remote access can be attempted using tools such as:
+
+evil-winrm -i <target-ip> -u <username> -p <password>
+
+This can provide a remote shell over WinRM.
+
+---
+
+## Summary
+
+* Accessed the target system via Netcat
+* Enumerated local group membership
+* Identified an additional user in the Remote Management Users group
+* Recognized the importance of this group for remote access
