@@ -1,0 +1,137 @@
+# MySQL Enumeration - Authentication Plugin Identification
+
+## Objective
+
+The goal of this task was to:
+
+* Connect to a remote MySQL service
+* Enumerate information about the database system
+* Identify the authentication plugin used for a specific user
+
+---
+
+## Key Finding
+
+The authentication plugin used was:
+
+caching_sha2_password
+
+---
+
+## Understanding the Authentication Plugin
+
+MySQL uses authentication plugins to define how user passwords are handled during login.
+
+This includes:
+
+* How the password is hashed
+* How it is transmitted
+* How it is verified by the server
+
+---
+
+## Plugin Analysis
+
+The plugin name can be broken down as follows:
+
+* sha2 → uses SHA-256 hashing (stronger than SHA1)
+* caching → caches authentication data for faster repeated logins
+* password → indicates password-based authentication
+
+This is the default authentication method in MySQL 8.
+
+---
+
+## Comparison with Older Method
+
+Older MySQL versions commonly used:
+
+mysql_native_password
+
+Differences:
+
+* mysql_native_password → uses SHA1 (weaker)
+* caching_sha2_password → uses SHA256 (stronger)
+
+This shows the system is using a more modern and secure authentication mechanism.
+
+---
+
+## Service Enumeration via Netcat
+
+Connection attempt:
+
+nc -nv 192.168.142.16 3306
+
+### Command Breakdown
+
+* nc → tool for raw TCP connections
+* -n → disables DNS resolution
+* -v → enables verbose output
+* 192.168.142.16 → target IP
+* 3306 → default MySQL port
+
+---
+
+## Observed Behavior
+
+Upon connection, the MySQL server returned a handshake response containing:
+
+* Server version (e.g. 8.0.21)
+* Authentication plugin name (caching_sha2_password)
+
+This information was retrieved without authentication.
+
+---
+
+## Protocol Behavior Explanation
+
+MySQL servers send an initial handshake packet upon connection.
+
+This packet includes:
+
+* Protocol version
+* Server version
+* Authentication plugin
+* Random salt
+* Capability flags
+
+Since netcat does not speak the MySQL protocol, it cannot respond correctly.
+
+This resulted in the expected error:
+
+"Got packets out of order"
+
+This confirms the server is functioning normally.
+
+---
+
+## Key Concept
+
+Even without valid credentials, it is possible to gather valuable information through service interaction.
+
+This includes:
+
+* Software version
+* Authentication method
+* Protocol behavior
+
+---
+
+## Security Insight
+
+Although caching_sha2_password is more secure, overall system security still depends on:
+
+* Password strength
+* Proper configuration
+* Network exposure
+* Presence of application vulnerabilities (e.g. SQL injection)
+
+A strong authentication plugin alone does not guarantee security.
+
+---
+
+## Result
+
+Authentication plugin used:
+caching_sha2_password
