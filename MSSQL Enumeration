@@ -1,0 +1,140 @@
+# MSSQL Enumeration - sysusers Table
+
+## Objective
+
+The goal of this task was to:
+
+* Connect to a remote MSSQL instance
+* Enumerate available databases
+* Explore the sysusers table within the master database
+* Identify the first user listed
+
+---
+
+## Target Information
+
+* Target IP: 192.168.233.18
+* Username: Administrator
+* Password: (provided in lab)
+
+---
+
+## Connecting to MSSQL
+
+Used Impacket MSSQL client from Kali Linux:
+
+impacket-mssqlclient Administrator@192.168.233.18 -windows-auth
+
+### Explanation
+
+* impacket-mssqlclient → tool to interact with MSSQL servers
+* Administrator → username
+* 192.168.233.18 → target IP
+* -windows-auth → use Windows authentication
+
+After authentication, access to the SQL shell was obtained.
+
+---
+
+## Enumerating Databases
+
+Executed:
+
+SELECT name FROM sys.databases;
+
+### Explanation
+
+* SELECT → retrieves data
+* name → column containing database names
+* sys.databases → system table storing database information
+
+This lists all available databases on the server.
+
+---
+
+## Switching Database Context
+
+Ensured working within the master database:
+
+USE master;
+GO
+
+### Explanation
+
+* USE master → switches to the master database
+* GO → executes the command batch
+
+---
+
+## Enumerating sysusers Table
+
+Executed:
+
+SELECT * FROM sysusers;
+
+### Explanation
+
+* SELECT * → retrieves all columns
+* FROM sysusers → queries system table containing database users
+
+---
+
+## Analyzing Results
+
+The output contains multiple entries with fields such as:
+
+* uid → user ID
+* name → username or role
+
+Typical entries include:
+
+* public
+* dbo
+* guest
+* INFORMATION_SCHEMA
+* sys
+
+---
+
+## Identifying the First User
+
+The first entry in the name column was:
+
+public
+
+---
+
+## Key Commands Summary
+
+impacket-mssqlclient Administrator@192.168.233.18 -windows-auth
+SELECT name FROM sys.databases;
+USE master;
+GO
+SELECT * FROM sysusers;
+
+---
+
+## Additional Enumeration Commands
+
+* SELECT @@version; → displays SQL Server version
+* SELECT * FROM sys.syslogins; → lists server logins
+* SELECT SYSTEM_USER; → shows current user
+
+---
+
+## Key Concept
+
+The sysusers table is a built-in MSSQL system table that stores:
+
+* Database users
+* Roles
+* Permission-related information
+
+Default entries such as public and dbo are commonly present in most MSSQL environments.
+
+---
+
+## Result
+
+First user in sysusers table:
+public
