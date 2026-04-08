@@ -1,0 +1,86 @@
+# Antivirus Evasion – AV Components & Operations
+
+## Objective
+In this lab, I connected to a Windows machine, retrieved a malware sample, analyzed it using VirusTotal, and extracted the flag from its behavior.
+
+---
+
+## Step 1: Connect to the machine
+
+I used RDP to connect to the target:
+
+xfreerdp /v:192.168.229.61 /u:offsec /p:lab +clipboard /drive:shared,/root/
+
+This also allowed me to transfer files between my Kali machine and the target.
+
+---
+
+## Step 2: Find the file
+
+After logging in, I went to the Desktop and found a file named:
+
+malware.exe
+
+---
+
+## Step 3: Do not execute the file
+
+I did NOT run the file because:
+- It is a malware sample
+- It may execute silently
+- It is not needed for solving the lab
+
+---
+
+## Step 4: Transfer the file
+
+I copied the file and pasted it into:
+
+\\tsclient\shared
+
+Then on Kali:
+
+ls /root/
+
+I confirmed that the file was successfully transferred.
+
+---
+
+# Step 5: Upload to VirusTotal
+
+I uploaded the file to VirusTotal for analysis.
+
+---
+
+#Step 6: Check behavior
+
+After the scan finished, I went to:
+
+Behavior  Process and service actions
+
+---
+
+# Step 7: Find the flag
+
+I looked through the process activity and found the flag:
+
+OS{0e16c05769936d13c0f72b9c3007e51b}
+
+---
+
+# What I learned
+
+- Never execute unknown files directly
+- Use sandbox tools like VirusTotal for analysis
+- Behavior analysis is very useful to understand malware activity
+- The flag can be hidden in process actions, registry, or file activity
+
+
+
+ Notes
+
+ The shared folder \\tsclient\shared is very useful for file transfer in RDP sessions
+ Always check the Behavior tab in VirusTotal, not just detection results
+
+
+Umar – OSCP Student
